@@ -20,4 +20,6 @@ WORKDIR ${BOTDIR}
 
 RUN npm install
 
+RUN chmod a+x bin/hubot
+
 CMD bin/hubot
