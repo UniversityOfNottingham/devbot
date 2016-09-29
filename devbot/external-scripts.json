@@ -5,5 +5,8 @@
   "hubot-shipit",
   "hubot-http-status",
   "hubot-memes",
-  "hubot-giphy"
+  "hubot-giphy",
+  "hubot-euphemism",
+  "hubot-magic-8-ball",
+  "hubot-numberwang"
 ]
