@@ -4,5 +4,6 @@
   "hubot-rules",
   "hubot-shipit",
   "hubot-http-status",
-  "hubot-memes"
+  "hubot-memes",
+  "hubot-giphy"
 ]
