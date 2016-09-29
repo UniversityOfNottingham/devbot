@@ -9,7 +9,7 @@
 #
 # Commands:
 #   hubot xkcd - The latest XKCD comic
-#   hubot xkcd <num> - XKCD comic <num>
+#   hubot xkcd #<num> - XKCD comic <num>
 #   hubot xkcd ? - XKCD comic <num>
 #   hubot xkcd <phrase> - XKCD comic relevant to <phrase>
 #
@@ -31,7 +31,7 @@ module.exports = (robot) ->
           object = JSON.parse(body)
           msg.send object.title, object.img, object.alt
 
-  robot.respond /xkcd\s+(\d+)/i, (msg) ->
+  robot.respond /xkcd\s+#(\d+)/i, (msg) ->
     num = "#{msg.match[1]}"
 
     msg.http("http://xkcd.com/#{num}/info.0.json")
@@ -55,7 +55,7 @@ module.exports = (robot) ->
                  object = JSON.parse(body)
                  msg.send object.title, object.img, object.alt
     
-  robot.respond /xkcd\s+(.+)/i, (msg) ->
+  robot.respond /xkcd\s+([^#].+)/i, (msg) ->
     phrase = "#{msg.match[1]}"
 
     # Get a relevant XKCD by phrase
