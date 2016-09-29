@@ -11,7 +11,7 @@
 #   hubot xkcd - The latest XKCD comic
 #   hubot xkcd <num> - XKCD comic <num>
 #   hubot xkcd ? - XKCD comic <num>
-#   hubot xkcd <text> - XKCD comic relevant to <text>
+#   hubot xkcd <phrase> - XKCD comic relevant to <phrase>
 #
 # Author:
 #   twe4ked
@@ -55,8 +55,8 @@ module.exports = (robot) ->
                  object = JSON.parse(body)
                  msg.send object.title, object.img, object.alt
     
-    robot.respond /xkcd\s+(\w+)/i, (msg) ->
-      text = "#{msg.match[1]}"
+    robot.respond /xkcd\s+(\.+)/i, (msg) ->
+      phrase = "#{msg.match[1]}"
 
       # Get a relevant XKCD by phrase
       msg.http("https://relevantxkcd.appspot.com/process?action=xkcd&query=#{phrase}")
