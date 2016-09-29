@@ -3,5 +3,6 @@
   "hubot-help",
   "hubot-rules",
   "hubot-shipit",
-  "hubot-http-status"
+  "hubot-http-status",
+  "hubot-memes"
 ]
