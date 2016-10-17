@@ -15,7 +15,7 @@
 #   beforan
 
 module.exports = (robot) ->
-  robot.hear /\/(\w)\/(\w+)(?\/(\w+))?/, (msg) ->
+  robot.hear /\/(\w)\/(\w+)(?:\/(\w+))?/, (msg) ->
     linktype = "#{msg.match[1]}"
     linktarget = "#{msg.match[2]}"
     multireddit = "#{msg.match[3]}"
