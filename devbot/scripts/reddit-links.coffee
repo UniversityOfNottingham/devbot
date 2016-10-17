@@ -11,11 +11,14 @@
 #   /r/gifs - will provide a link to https://reddit.com/r/gifs
 #   /u/beforan - will provide a link to https://reddit.com/user/beforan
 #   /m/reddit/redditnews - will provide a link to https://reddit.com/user/reddit/m/redditnews
+#
 # Author:
 #   beforan
 
 module.exports = (robot) ->
   robot.hear /\/(\w)\/(\w+)(?:\/(\w+))?/, (msg) ->
+    return if msg.bot # slack adapter should be handling this but w/e
+
     linktype = "#{msg.match[1]}"
     linktarget = "#{msg.match[2]}"
     multireddit = "#{msg.match[3]}"
