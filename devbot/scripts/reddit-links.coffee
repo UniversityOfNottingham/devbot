@@ -21,8 +21,7 @@ module.exports = (robot) ->
     multireddit = "#{msg.match[3]}"
     
     switch linktype
-      when "r" then
-      when "u" then
+      when "r", "u"
         msg.send "https://reddit.com/#{linktype}/#{linktarget}"
-      when "m" then
+      when "m"
         msg.send "https://reddit.com/user/#{linktarget}/m/#{multireddit}"
