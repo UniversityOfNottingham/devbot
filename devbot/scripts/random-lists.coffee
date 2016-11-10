@@ -52,7 +52,7 @@ module.exports = (robot) ->
       msg.send msg.random(lists[identifier])
     else if identifier of combos
       for c, i in combos[identifier]
-        if typeof c is string
+        if typeof c is "string"
           msg.send "#{c}: #{msg.random(lists[c])}"
-        else if typeof c is object
+        else if typeof c is "object"
           msg.send "#{c.name}: #{msg.random(lists[c.list])}"
