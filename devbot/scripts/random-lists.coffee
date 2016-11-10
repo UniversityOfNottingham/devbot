@@ -51,7 +51,7 @@ module.exports = (robot) ->
     if identifier of lists
       msg.send msg.random(lists[identifier])
     else if identifier of combos
-      for c, i in combos[identifier]
+      for c, i in combos[identifier].reverse() # reverse because coffeescript for loops iterate backwards >.<
         if typeof c is "string"
           msg.send "#{c}: #{msg.random(lists[c])}"
         else if typeof c is "object"
