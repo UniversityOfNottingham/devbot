@@ -9,7 +9,7 @@ ENV HUBOT_SLACK_TOKEN xxxxxxxxxxxxxxxxxxxxx
 
 EXPOSE ${HUBOT_PORT}
 
-COPY ./devbot ${BOTDIR}
+COPY ../devbot ${BOTDIR}
 
 WORKDIR ${BOTDIR}
 
