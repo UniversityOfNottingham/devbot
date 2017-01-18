@@ -1,0 +1,4 @@
+devbot:
+    image: nottinghamuniversity/devbot:latest
+    environment:
+        - HUBOT_SLACK_TOKEN
