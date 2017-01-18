@@ -9,9 +9,19 @@ This repository also contains utility bits for running hubot inside a simple nod
 ## Usage
 
 1. Have [Docker](https://www.docker.com/).
-2. Inside the repository root:
-    1. Build an image from source: `docker build -t devbot .`
-    2. Run a container from the image: `docker run -d devbot [-e ENVIRONMENT_VARIABLES]`
+1. Set the `HUBOT_SLACK_TOKEN` environment variable
+1. Inside the repository root: `docker-compose up`
+
+Alternatively if you have a [Rancher] infrastructure you can `rancher-compose up` as appropriate
+
+Note for testing: you can specify the environment variable temporarily as follows:
+
+- bash and derivatives:
+    - `HUBOT_SLACK_TOKEN=xxxxxxxxxxxx docker-compose up`
+    - the environment variable only applies to that command
+- powershell
+    - `& { $env:HUBOT_SLACK_TOKEN='xxxxxxxxxxxx'; docker-compose up }`
+    - the environment variable only applies to the current powershell session
 
 ## Contributing
 
@@ -26,3 +36,5 @@ and if appropriate make pull requests to rectify them.
 ## License
 
 The source here is all under the MIT license. Feel free to take any of our modified or original scripts, or the Docker bits.
+
+[Rancher]: https://rancher.com

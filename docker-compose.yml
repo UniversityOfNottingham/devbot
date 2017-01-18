@@ -1,0 +1,4 @@
+devbot:
+    build: devbot
+    environment:
+        - HUBOT_SLACK_TOKEN
