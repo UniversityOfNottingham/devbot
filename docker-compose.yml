@@ -2,3 +2,5 @@ devbot:
     build: devbot
     environment:
         - HUBOT_SLACK_TOKEN
+    volumes:
+        - ./devbot/src/scripts:/opt/devbot/scripts
