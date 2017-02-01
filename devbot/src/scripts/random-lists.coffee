@@ -14,12 +14,12 @@
 # Author:
 #   beforan
 
-lists = {
-  "direction": [
+lists =
+  direction: [
     "clockwise",
     "anti-clockwise"
   ],
-  "staircase": [
+  staircase: [
     "Reception",
     "Vending Machines",
     "Canteen",
@@ -27,32 +27,35 @@ lists = {
     "Post Room",
     "Transform"
   ]
-}
 
-combos = {
-  "walk": [
-    {
-      "name": "first staircase",
-      "list": "staircase"
-    },
-    "direction",
-    {
-      "name": "second staircase",
-      "list": "staircase"
-    }
+combos = 
+  walk: [
+      name: "First staircase",
+      list: "staircase"
+    ,
+      name: "Direction",
+      list: "direction"
+    ,
+      name: "Second staircase",
+      list: "staircase"
   ]
-}
 
 module.exports = (robot) ->
   robot.respond /random\s+(.+)/i, (msg) ->
-    identifier = "#{msg.match[1]}"
+    identifier = msg.match[1]
 
     # prioritise list
     if identifier of lists
       msg.send msg.random(lists[identifier])
     else if identifier of combos
-      for c, i in combos[identifier].reverse() # reverse because coffeescript for loops iterate backwards >.<
+      fields = []
+      for c, i in combos[identifier]
         if typeof c is "string"
-          msg.send "#{c}: #{msg.random(lists[c])}"
+          fields.push title: c, value: msg.random(lists[c])
         else if typeof c is "object"
-          msg.send "#{c.name}: #{msg.random(lists[c.list])}"
+          fields.push title: c.name, value: msg.random(lists[c.list])
+      
+      msg.send attachments: [
+        fields: fields,
+        pretext: "Random #{identifier}:"
+      ]
