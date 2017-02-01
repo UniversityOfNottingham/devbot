@@ -2,5 +2,6 @@ devbot:
     build: devbot
     environment:
         - HUBOT_SLACK_TOKEN
+        - BITBUCKET_API_KEY
     volumes:
         - ./devbot/src/scripts:/opt/devbot/scripts

@@ -5,7 +5,7 @@ ENV BOTDIR /opt/devbot
 ENV HUBOT_PORT 8080
 
 ENV HUBOT_ADAPTER slack
-ENV HUBOT_SLACK_TOKEN xxxxxxxxxxxxxxxxxxxxx
+ENV BITBUCKET_TEAM_NAME nottinghamuniversity
 
 EXPOSE ${HUBOT_PORT}
 
