@@ -11,6 +11,7 @@
 #   hubot xkcd - The latest XKCD comic
 #   hubot xkcd #<num> - XKCD comic <num>
 #   hubot xkcd <phrase> - XKCD comic relevant to <phrase>
+#   hubot xkcd ? - random xkcd comic
 #
 # Author:
 #   twe4ked
@@ -76,4 +77,3 @@ module.exports = (robot) ->
           else
             object = JSON.parse(body)
             msg.send object.title, object.img, object.alt
-
