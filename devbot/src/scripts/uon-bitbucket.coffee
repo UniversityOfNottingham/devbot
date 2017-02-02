@@ -9,6 +9,7 @@
 #
 # Commands:
 #   hubot repo -- last 5 updated repos
+#   hubot repo get <repo or project name> -- get links to repos or projects with an exact name (case insensitive)
 #   hubot repo search <partial repo name> -- search
 #   hubot repo searchprojects <partial project name> -- search projects
 #   hubot repo create <name> <project> -- creates a repo in the given project, creates project if necessary
@@ -88,21 +89,84 @@ module.exports = (robot) ->
       .catch (err) ->
         msg.send err.error.message
 
-  #search repos
+  # repo get <repo or project name> # TODO repo slugs, project keys?
+  robot.respond /repo\sget\s(.+)$/i, (msg) ->
+    name = msg.match[1]
+    fields = []
+
+    # these are synchronous right now, but could easily be async...
+    Promise.all([
+      getProjectsByName(msg, name, "values.name,values.links.html.href"),
+      getReposByName(msg, name, "values.name,values.links.html.href")
+    ])
+      .then (results) ->
+        projects = []
+        for p in results[0]
+          projects.push "<#{p.links.html.href}|#{p.name}>"
+        if projects.length > 0 then fields.push title: "Projects", value: projects.join('\n')
+
+        repos = []
+        for r in results[1]
+          repos.push "<#{r.links.html.href}|#{r.name}>"
+        if repos.length > 0 then fields.push title: "Repositories", value: repos.join('\n')
+
+        if fields.length > 0
+          msg.send attachments: [
+            fallback: "Results for repo get #{name}",
+            fields: fields
+          ]
+        else
+          msg.send "No results found"
+
   #------------------
   # utility functions
   #------------------
 
   #search repos by name
-  searchRepos = (msg, searchTerm, fields) ->
-    queryRepos msg, "name~\"#{searchTerm}\"", fields || "size,values.links.html.href,values.name"
+  searchRepos = (msg, searchTerm, fields, pagelen) ->
+    queryRepos msg, "name~\"#{searchTerm}\"", fields || "size,values.links.html.href,values.name", pagelen
 
   #search projects by name
-  searchProjects = (msg, searchTerm, fields) ->
-    queryProjects msg, "name~\"#{searchTerm}\"", fields || "size,values.links.html.href,values.name"
+  searchProjects = (msg, searchTerm, fields, pagelen) ->
+    queryProjects msg, "name~\"#{searchTerm}\"", fields || "size,values.links.html.href,values.name", pagelen
+
+  # get projects by exact case insensitive name match
+  getProjectsByName = (msg, name, fields) ->
+    searchProjects(msg, name, fields || "size,values.name,values.key", 100)
+      .then (result) ->
+        projects = []
+
+        # theoretically in future need to deal with size > 100, but should be super unlikely
+        for project in result.values
+          if project.name.toLowerCase() == name.toLowerCase() then projects.push project
+        
+        projects
+  
+  # get repos by exact case insensitive name match
+  getReposByName = (msg, name, fields) ->
+    searchRepos(msg, name, fields || "size,values.name", 100)
+      .then (result) ->
+        repos = []
+
+        # theoretically in future need to deal with size > 100, but should be super unlikely
+        for repo in result.values
+          if repo.name.toLowerCase() == name.toLowerCase() then repos.push repo
+        
+        repos
+
+  # get project by key
+  getProjectByKey = (msg, key, fields) ->
+    new Promise (resolve, reject) ->
+      msg.http("#{baseUrl}/teams/#{teamName}/projects/#{if fields then "?fields=#{fields}" else ""}")
+        .headers(Authorization: authHeader)
+        .get() (err, res, body) ->
+          if res.statusCode == 404
+            reject error: message: 'Project with key "#{key}" does not exist'
+          else
+            resolve JSON.parse(body)
 
   # query repos
-  queryRepos = (msg, query, fields) ->
+  queryRepos = (msg, query, fields, pagelen) ->
     query = encodeURIComponent query
     url = "#{baseUrl}/repositories/#{teamName}/?q=#{query}#{if fields then "&fields=#{fields}" else ""}"
 
@@ -116,7 +180,8 @@ module.exports = (robot) ->
             resolve JSON.parse(body)
 
   # query projects
-  queryProjects = (msg, query, fields) ->
+  queryProjects = (msg, query, fields, pagelen) ->
+    pagelen = if pagelen > 100 then 100 else pagelen || 10
     query = encodeURIComponent query
     url = "#{baseUrl}/teams/#{teamName}/projects/?q=#{query}#{if fields then "&fields=#{fields}" else ""}"
 
