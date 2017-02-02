@@ -9,10 +9,9 @@
 #
 # Commands:
 #   hubot repo -- last 5 updated repos
-#   hubot repo get <repo or project name> -- exact match
 #   hubot repo search <partial repo name> -- search
-#   hubot repo search project <partial repo name> -- search projects
-#   hubot repo create <name> <project> creates a repo in the given project, creates project if necessary
+#   hubot repo searchprojects <partial project name> -- search projects
+#   hubot repo create <name> <project> -- creates a repo in the given project, creates project if necessary
 #
 # Author:
 #   beforan
@@ -23,7 +22,10 @@ apiKey = process.env.BITBUCKET_API_KEY
 authHeader = 'Basic ' + new Buffer(teamName + ':' + apiKey).toString('base64')
 
 module.exports = (robot) ->
-
+  #----------
+  # listeners
+  #----------
+  
   # repo
   robot.respond /repo$/i, (msg) ->
     msg.http("#{baseUrl}/repositories/#{teamName}?sort=-updated_on&fields=values.name,values.links.html.href,values.updated_on&pagelen=5")
@@ -41,81 +43,6 @@ module.exports = (robot) ->
             text: attachmentsText.join('\n'),
             pretext: "5 most recently updated repositories"
           ]
-
-  # repo get <repo or project name>
-  # robot.respond /repo\sget\s(.+)$/i, (msg) ->
-  #   name = msg.match[1]
-
-  #   attachments = []
-
-  #   # direct match project name
-  #   query = encodeURIComponent("name=\"#{name}\"")
-  #   fields = "size,values.links.html.href,values.name"
-  #   url = "#{baseUrl}/teams/#{teamName}/projects/?q=#{query}&fields=#{fields}"
-  #   msg.http(url)
-  #     .headers(Authorization: authHeader)
-  #     .get() (err, res, body) ->
-  #       if res.statusCode == 404
-  #         return msg.send 'team "#{teamName}" does not exist'
-  #       else
-  #         json = JSON.parse(body)
-
-  #         if json.size > 0
-  #           projects = json.values
-  #           attachmentsText = []
-
-  #           for proj, i in projects
-  #             attachmentsText.push "<#{proj.links.html.href}|#{proj.name}>"
-
-  #           attachment = { "text": attachmentsText.join('\n') }
-  #           attachment.pretext = "#{json.size} project#{if json.size > 1 then "s" else ""}"
-  #           attachments.push attachment
-    
-  #       # all done? next http call
-  #       # direct match repo name
-  #       fields = "values.links.html.href,values.name,values.project.name,values.project.links.html.href"
-  #       query = encodeURIComponent("name=\"#{name}\"")
-  #       url = "#{baseUrl}/repositories/#{teamName}/?q=#{query}&fields=#{fields}"
-  #       msg.http(url)
-  #         .headers(Authorization: authHeader)
-  #         .get() (err, res, body) ->
-  #           if res.statusCode == 404
-  #             return msg.send 'team "#{teamName}" does not exist'
-  #           else
-  #             json = JSON.parse(body)
-
-  #             if json.size > 0
-  #               repos = json.values
-  #               attachmentsText = []
-
-  #               for repo, i in repos
-  #                 attachmentsText.push "<#{repo.links.html.href}|#{repo.name}> (<#{repo.project.links.html.href}|#{repo.project.name}> project)"
-
-  #               attachment = { "text": attachmentsText.join('\n') }
-  #               attachment.pretext = "#{json.size} repo#{if json.size > 1 then "s" else ""}"
-  #               attachments.push attachment
-            
-  #           # all done? next http call
-  #           # direct match repo slug
-  #           fields = "links.html.href,name,project.name,project.links.html.href"
-  #           url = "#{baseUrl}/repositories/#{teamName}/#{encodeURIComponent(name)}/?fields=#{fields}"
-  #           msg.http(url)
-  #             .headers(Authorization: authHeader)
-  #             .get() (err, res, body) ->
-  #               if res.statusCode != 404
-  #                 repo = JSON.parse(body)
-  #                 attachments.push {
-  #                   "text": "<#{repo.links.html.href}|#{repo.name}> (<#{repo.project.links.html.href}|#{repo.project.name}> project)",
-  #                   "pretext": "1 repo"
-  #                 }
-
-  #               # all done: send a message of some kind
-  #               if attachments.length > 0
-  #                 msg.send {
-  #                   "attachments": attachments
-  #                 }
-  #               else
-  #                 msg.send "no results"
 
   # repo search <repo>
   robot.respond /repo\ssearch\s(.+)$/i, (msg) ->
@@ -140,7 +67,7 @@ module.exports = (robot) ->
         msg.send err.error.message
   
   # repo search project <project>
-  robot.respond /repo\ssearch\sproject\s(.+)$/i, (msg) ->
+  robot.respond /repo\ssearchprojects\s(.+)$/i, (msg) ->
     name = msg.match[1]
 
     searchProjects(msg, name)
@@ -162,10 +89,22 @@ module.exports = (robot) ->
         msg.send err.error.message
 
   #search repos
+  #------------------
+  # utility functions
+  #------------------
+
+  #search repos by name
   searchRepos = (msg, searchTerm, fields) ->
-    fields = fields || "size,values.links.html.href,values.name,values.project.name,values.project.links.html.href"
-    query = encodeURIComponent "name~\"#{searchTerm}\"" #case insensitive contains
-    url = "#{baseUrl}/repositories/#{teamName}/?q=#{query}&fields=#{fields}"
+    queryRepos msg, "name~\"#{searchTerm}\"", fields || "size,values.links.html.href,values.name"
+
+  #search projects by name
+  searchProjects = (msg, searchTerm, fields) ->
+    queryProjects msg, "name~\"#{searchTerm}\"", fields || "size,values.links.html.href,values.name"
+
+  # query repos
+  queryRepos = (msg, query, fields) ->
+    query = encodeURIComponent query
+    url = "#{baseUrl}/repositories/#{teamName}/?q=#{query}#{if fields then "&fields=#{fields}" else ""}"
 
     new Promise (resolve, reject) ->
       msg.http(url)
@@ -175,12 +114,11 @@ module.exports = (robot) ->
             reject error: message: 'team "#{teamName}" does not exist'
           else
             resolve JSON.parse(body)
-  
-  #search projects
-  searchProjects = (msg, searchTerm, fields) ->
-    fields = fields || "size,values.links.html.href,values.name"
-    query = encodeURIComponent "name~\"#{searchTerm}\"" #case insensitive contains
-    url = "#{baseUrl}/teams/#{teamName}/projects/?q=#{query}&fields=#{fields}"
+
+  # query projects
+  queryProjects = (msg, query, fields) ->
+    query = encodeURIComponent query
+    url = "#{baseUrl}/teams/#{teamName}/projects/?q=#{query}#{if fields then "&fields=#{fields}" else ""}"
 
     new Promise (resolve, reject) ->
       msg.http(url)
