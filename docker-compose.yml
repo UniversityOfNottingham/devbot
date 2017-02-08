@@ -2,5 +2,23 @@ devbot:
     build: devbot
     environment:
         - HUBOT_SLACK_TOKEN
+        - REDIS_URL=redis://docker-protected-mode-password@redis
     volumes:
         - ./devbot/src/scripts:/opt/devbot/scripts
+    links:
+        - redis
+
+redis:
+    environment:
+        - BIND_LOCAL=true
+        - REDIS_PASSWORD=docker-protected-mode-password
+    image: d-reg.nottingham.ac.uk/redis:latest
+    restart: always
+    volumes_from:
+        - redis_data
+
+redis_data:
+    image: busybox:latest
+    restart: always
+    volumes:
+        - /data

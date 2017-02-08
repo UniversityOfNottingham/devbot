@@ -9,5 +9,6 @@
   "hubot-euphemism",
   "hubot-magic-8-ball",
   "hubot-numberwang",
-  "hubot-wikipedia"
+  "hubot-wikipedia",
+  "hubot-redis-brain"
 ]
